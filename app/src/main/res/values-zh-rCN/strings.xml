@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">gCallRecorder</string>
+    <string name="app_description">Google 电话静默通话录音 + 自动录制联系人</string>
+</resources>

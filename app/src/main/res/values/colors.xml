@@ -1,0 +1,6 @@
+<resources>
+    <color name="ok">#2E7D32</color>
+    <color name="bad">#C62828</color>
+    <color name="card">#1F000000</color>
+    <color name="accent">#2E7D32</color>
+</resources>

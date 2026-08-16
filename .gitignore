@@ -1,0 +1,23 @@
+*.iml
+.gradle
+/local.properties
+/.idea
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# recon scratch (not part of the module)
+_pull/
+# SDD scratch workspace (ledger, briefs, review packages)
+.superpowers/
+# harness noise
+.claude/
+# local build notes (kept out of the published README)
+/BUILDING.md
+# signing material — NEVER commit
+*.jks
+*.keystore
+keystore.properties

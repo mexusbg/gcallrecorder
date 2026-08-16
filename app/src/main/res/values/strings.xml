@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">gCallRecorder</string>
+    <string name="app_description">Silent call recording for Google Dialer + auto-record your contacts</string>
+</resources>

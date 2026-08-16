@@ -1,0 +1,68 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag to build, e.g. v1.0.0'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version
+        id: ver
+        run: |
+          NAME="${{ github.event.inputs.version }}"
+          [ -z "$NAME" ] && NAME="${GITHUB_REF_NAME}"
+          echo "name=$NAME" >> "$GITHUB_OUTPUT"
+          echo "Building $NAME"
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install SDK packages (platform 36, build-tools 36, NDK)
+        run: |
+          yes | sdkmanager --licenses >/dev/null 2>&1 || true
+          sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "ndk;27.1.12297006"
+
+      - name: Decode keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/release.jks"
+
+      - name: Build signed release APK
+        env:
+          KEYSTORE_FILE: ${{ runner.temp }}/release.jks
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          ./gradlew --no-configuration-cache \
+            -PappVersionName=${{ steps.ver.outputs.name }} \
+            :app:assembleRelease
+
+      - name: Stage APK
+        run: |
+          cp app/build/outputs/apk/release/app-release.apk \
+             "gCallRecorder-${{ steps.ver.outputs.name }}.apk"
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.name }}
+          name: gCallRecorder ${{ steps.ver.outputs.name }}
+          files: gCallRecorder-*.apk
+          generate_release_notes: true
+          fail_on_unmatched_files: true
